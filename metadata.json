@@ -1,0 +1,6 @@
+{
+  "name": "Vessel of Grace Christian Center - VOG",
+  "description": "Official mobile-first digital church app for Vessel of Grace Christian Center (VOG), led by Senior Pastor West Somina in Omagwa, Port Harcourt, Rivers State, Nigeria. Watch live services, read daily devotionals, receive daily lifts, view sermons, and get church directions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

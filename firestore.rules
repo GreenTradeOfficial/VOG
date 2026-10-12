@@ -1,0 +1,176 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default deny all unspecified collections and documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Role-Based Access Control:
+    // Authorized church administrative email or authenticated UID recorded in /admins/{uid}
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'mehedebaedmond@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Church Leadership & Pastors Profiles (/churchLeadership/{leaderId})
+    match /churchLeadership/{leaderId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Guest Ministers Collection (/guestMinisters/{ministerId})
+    match /guestMinisters/{ministerId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Anniversary Guests & Ministers Profiles Collection (/anniversaryGuests/{guestId})
+    match /anniversaryGuests/{guestId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Sermons Archive (/sermons/{sermonId})
+    match /sermons/{sermonId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Church Events & Programs (/events/{eventId})
+    match /events/{eventId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Official Church Announcements (/announcements/{announcementId})
+    match /announcements/{announcementId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Daily Lifts (/dailyLifts/{liftId})
+    match /dailyLifts/{liftId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Daily Devotionals (/dailyDevotions/{devotionId})
+    match /dailyDevotions/{devotionId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Pastoral Prayer Requests & Voice Notes (/prayerRequests/{requestId})
+    // Visitors and members can submit text or voice prayer requests. Only authorized
+    // pastoral administrators and the requesting member can view or listen to them.
+    match /prayerRequests/{requestId} {
+      allow create: if isValidId(requestId);
+      allow get, list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Private Member Voice Notes to Church Leadership (/voiceNotes/{noteId})
+    match /voiceNotes/{noteId} {
+      allow create: if isValidId(noteId);
+      allow get, list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Administrators registry (read-only for authenticated self/admins, no direct client writes)
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && isSignedIn() && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin();
+      allow write: if false;
+    }
+
+    // Live Stream Configuration & Telemetry (/liveConfig/{configId})
+    match /liveConfig/{configId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Live Stream Real-Time Chat & Amen Wall (/liveChatMessages/{messageId})
+    function isValidLiveChatMessage(data) {
+      return data.userName is string &&
+        data.userName.size() >= 1 &&
+        data.userName.size() <= 100 &&
+        data.message is string &&
+        data.message.size() >= 1 &&
+        data.message.size() <= 1000 &&
+        (!('type' in data) || data.type in ['chat', 'amen', 'prayer_point', 'praise']) &&
+        (!('isAmen' in data) || data.isAmen is bool);
+    }
+
+    match /liveChatMessages/{messageId} {
+      allow get, list: if true;
+      allow create: if isValidId(messageId) && isValidLiveChatMessage(incoming());
+      allow update, delete: if isAdmin();
+    }
+
+    // Church Settings (/church_settings/{settingId})
+    match /church_settings/{settingId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Member Profiles, Saved Favorites & Activity Tracking (/users/{userId})
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if isValidId(userId) && isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isValidId(userId) && isAdmin();
+
+      match /favorites/{favoriteId} {
+        allow read, write: if isValidId(userId) && isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+
+      match /activity/{activityId} {
+        allow read, write: if isValidId(userId) && isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+
+      match /fcm_tokens/{tokenId} {
+        allow read, write: if isValidId(tokenId) && isSignedIn() && (request.auth.uid == userId || isAdmin());
+      }
+    }
+
+    // FCM Push Notification Tokens (/fcm_tokens/{tokenId})
+    match /fcm_tokens/{tokenId} {
+      allow create, update: if isValidId(tokenId);
+      allow read, delete: if isAdmin();
+    }
+
+    // Church Admin Push Notification Broadcasts (/push_broadcasts/{broadcastId})
+    match /push_broadcasts/{broadcastId} {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
+
+    // Diagnostics & Connection Healthcheck document
+    match /test/{testId} {
+      allow get: if isValidId(testId);
+      allow list, write: if false;
+    }
+  }
+}

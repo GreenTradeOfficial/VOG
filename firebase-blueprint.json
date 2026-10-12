@@ -1,0 +1,429 @@
+{
+  "entities": {
+    "AnniversaryGuest": {
+      "title": "AnniversaryGuest",
+      "description": "Guest profile and metadata for VOG 10th Anniversary celebration",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Full name of the guest or minister",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "description": "Role or category of the guest",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "ministry": {
+          "type": "string",
+          "description": "Church or ministry affiliation",
+          "maxLength": 200
+        },
+        "biography": {
+          "type": "string",
+          "description": "Short biography or profile introduction",
+          "maxLength": 2000
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "Firebase Cloud Storage download URL for the guest photo",
+          "maxLength": 2000
+        },
+        "photoStoragePath": {
+          "type": "string",
+          "description": "Storage path in Firebase Cloud Storage for photo management and deletion",
+          "maxLength": 500
+        },
+        "displayOrder": {
+          "type": "integer",
+          "description": "Sequence order for displaying guest card in the gallery"
+        },
+        "isPublished": {
+          "type": "boolean",
+          "description": "Visibility flag for public display"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["fullName", "role", "displayOrder", "createdAt", "updatedAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized church administrator record for RBAC",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Admin email address"
+        },
+        "role": {
+          "type": "string",
+          "description": "Administrative role title"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["email", "role"]
+    },
+    "ChurchLiveConfig": {
+      "title": "ChurchLiveConfig",
+      "description": "Sanctuary live stream broadcast configuration and genuine telemetry status",
+      "type": "object",
+      "properties": {
+        "isLive": {
+          "type": "boolean",
+          "description": "Whether church service is toggled live by admin"
+        },
+        "streamUrl": {
+          "type": "string",
+          "description": "Public HTTPS HLS (.m3u8) or stream video endpoint"
+        },
+        "title": {
+          "type": "string",
+          "description": "Broadcast title"
+        },
+        "serviceName": {
+          "type": "string",
+          "description": "Service name"
+        },
+        "streamType": {
+          "type": "string",
+          "description": "Stream type classification"
+        },
+        "validationStatus": {
+          "type": "string",
+          "description": "Validation status of the stream (verified_active, offline, unverified, unavailable)"
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Status message for viewers"
+        },
+        "isReceivingData": {
+          "type": "boolean",
+          "description": "Whether stream endpoint is actively receiving data and reachable"
+        },
+        "lastActiveAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when stream was last confirmed active"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of configuration change"
+        }
+      },
+      "required": ["isLive", "streamUrl"]
+    },
+    "LiveChatMessage": {
+      "title": "LiveChatMessage",
+      "description": "Real-time chat messages, prayer points, praises, and amens submitted by congregation members during live broadcasts",
+      "type": "object",
+      "properties": {
+        "userName": {
+          "type": "string",
+          "description": "Congregation member display name",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "message": {
+          "type": "string",
+          "description": "Text message content",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "type": {
+          "type": "string",
+          "description": "Category of message: chat, amen, prayer_point, or praise"
+        },
+        "isAmen": {
+          "type": "boolean",
+          "description": "Quick amen reaction flag"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp in Firestore"
+        }
+      },
+      "required": ["userName", "message", "type", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Church member profile information stored in Firestore",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "email": {
+          "type": "string",
+          "description": "Member email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Full name or church display name"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role: member, leader, or admin"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Contact telephone number"
+        },
+        "memberSince": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "UserFavorite": {
+      "title": "UserFavorite",
+      "description": "Saved devotional, lift, or sermon bookmark for a church member",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "itemId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "itemId", "type", "title"]
+    },
+    "UserActivity": {
+      "title": "UserActivity",
+      "description": "Member activity history log entry (logins, bookmarks, prayer submissions, teachings read)",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "referenceId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "type", "title", "createdAt"]
+    },
+    "Sermon": {
+      "title": "Sermon",
+      "description": "Church sermon audio/video recording",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "preacher": { "type": "string" },
+        "date": { "type": "string" },
+        "series": { "type": "string" },
+        "scripture": { "type": "string" },
+        "summary": { "type": "string" },
+        "duration": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "preacher", "date"]
+    },
+    "ChurchEvent": {
+      "title": "ChurchEvent",
+      "description": "Church program or calendar event",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date", "time"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Official church announcement notice",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "priority": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "date"]
+    },
+    "DailyLift": {
+      "title": "DailyLift",
+      "description": "Daily spiritual encouragement lift",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "scriptureRef": { "type": "string" },
+        "bibleVerseText": { "type": "string" },
+        "date": { "type": "string" },
+        "category": { "type": "string" },
+        "declaration": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "date"]
+    },
+    "DailyDevotion": {
+      "title": "DailyDevotion",
+      "description": "Daily devotional teaching and prayer",
+      "type": "object",
+      "properties": {
+        "theme": { "type": "string" },
+        "bibleRef": { "type": "string" },
+        "bibleVerse": { "type": "string" },
+        "teaching": { "type": "string" },
+        "prayer": { "type": "string" },
+        "declaration": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["theme", "date"]
+    },
+    "PrayerRequest": {
+      "title": "PrayerRequest",
+      "description": "Pastoral prayer request submitted by brethren",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "category": { "type": "string" },
+        "requestText": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["requestText"]
+    }
+  },
+  "firestore": {
+    "/sermons/{sermonId}": {
+      "schema": { "$ref": "#/entities/Sermon" },
+      "description": "Sermon audio and video recordings"
+    },
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/ChurchEvent" },
+      "description": "Church calendar and event programs"
+    },
+    "/announcements/{announcementId}": {
+      "schema": { "$ref": "#/entities/Announcement" },
+      "description": "Official church announcements"
+    },
+    "/dailyLifts/{liftId}": {
+      "schema": { "$ref": "#/entities/DailyLift" },
+      "description": "Spiritual daily lifts"
+    },
+    "/dailyDevotions/{devotionId}": {
+      "schema": { "$ref": "#/entities/DailyDevotion" },
+      "description": "Daily devotional study guides"
+    },
+    "/prayerRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/PrayerRequest" },
+      "description": "Pastoral prayer requests"
+    },
+    "/anniversaryGuests/{guestId}": {
+      "schema": {
+        "$ref": "#/entities/AnniversaryGuest"
+      },
+      "description": "Collection of guest speaker and minister profiles for the 10th anniversary"
+    },
+    "/admins/{adminId}": {
+      "schema": {
+        "$ref": "#/entities/Admin"
+      },
+      "description": "Authorized church administrators with editing privileges"
+    },
+    "/liveConfig/{configId}": {
+      "schema": {
+        "$ref": "#/entities/ChurchLiveConfig"
+      },
+      "description": "Sanctuary live stream settings and broadcast state in VOG Firestore"
+    },
+    "/liveChatMessages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/LiveChatMessage"
+      },
+      "description": "Collection of real-time congregation chat messages and prayer amens during live broadcasts"
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Member profile information"
+    },
+    "/users/{userId}/favorites/{favoriteId}": {
+      "schema": {
+        "$ref": "#/entities/UserFavorite"
+      },
+      "description": "Personal saved spiritual favorites for the authenticated church member"
+    },
+    "/users/{userId}/activity/{activityId}": {
+      "schema": {
+        "$ref": "#/entities/UserActivity"
+      },
+      "description": "Activity history tracking for the authenticated church member"
+    }
+  }
+}
